@@ -170,11 +170,11 @@ Workflow можно запускать:
 
 ### 4. Проверка `/predict` на blue-версии
 
-![Predict blue](screenshots/04_predict_blue.png)
+![Predict blue](screenshots/04_predict_response_blue.png)
 
 ### 5. Проверка `/predict` на green-версии
 
-![Predict green](screenshots/05_predict_green.png)
+![Predict green](screenshots/05_predict_response_green.png)
 
 ## Скриншоты после успешного деплоя
 
