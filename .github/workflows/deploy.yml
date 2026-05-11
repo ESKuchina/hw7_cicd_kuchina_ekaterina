@@ -13,9 +13,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      CLOUD_TOKEN: ${{ secrets.CLOUD_TOKEN }}
       MODEL_VERSION: ${{ secrets.MODEL_VERSION }}
-      DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+      RENDER_APP_URL: ${{ vars.RENDER_APP_URL }}
 
     steps:
       - uses: actions/checkout@v5
@@ -29,16 +28,20 @@ jobs:
           docker build -t ghcr.io/${{ github.repository }}:${MODEL_VERSION} .
           docker push ghcr.io/${{ github.repository }}:${MODEL_VERSION}
 
-      - name: Deploy via API
-        if: ${{ env.CLOUD_TOKEN != '' && env.DEPLOY_URL != '' }}
+      - name: Trigger Render deploy
         run: |
-          curl -X POST "${DEPLOY_URL}" \
-            -H "Authorization: Bearer ${CLOUD_TOKEN}" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "image=ghcr.io/${{ github.repository }}:${MODEL_VERSION}"
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
 
-      - name: Deployment note
-        if: ${{ env.CLOUD_TOKEN == '' || env.DEPLOY_URL == '' }}
+      - name: Wait for service warm-up
         run: |
-          echo "Docker image was published to GHCR."
-          echo "Deploy step was skipped because CLOUD_TOKEN or DEPLOY_URL is not configured."
+          sleep 60
+
+      - name: Check /health
+        run: |
+          curl "${RENDER_APP_URL}/health"
+
+      - name: Check /predict
+        run: |
+          curl -X POST "${RENDER_APP_URL}/predict" \
+            -H "Content-Type: application/json" \
+            -d '{"x":[1,2,3]}'
