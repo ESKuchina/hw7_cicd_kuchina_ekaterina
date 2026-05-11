@@ -1,0 +1,45 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ml.txt
+
+      - name: Run pipeline
+        run: |
+          python ml_pipeline.py | tee pipeline_output.txt
+
+      - name: Make pipeline reproducible
+        run: |
+          echo "Reproducibility checklist for ML pipeline"
+          python --version > python_version.txt
+          cat requirements-ml.txt > saved_requirements.txt
+          pip freeze > installed_packages.txt
+          shasum -a 256 ml_pipeline.py requirements-ml.txt > reproducibility_manifest.txt
+          echo "Randomness is controlled in code via random_state=42" >> reproducibility_manifest.txt
+          echo "Data source is deterministic: sklearn.datasets.load_iris()" >> reproducibility_manifest.txt
+
+      - name: Upload pipeline artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ml-pipeline-artifacts
+          path: |
+            pipeline_output.txt
+            python_version.txt
+            saved_requirements.txt
+            installed_packages.txt
+            reproducibility_manifest.txt
