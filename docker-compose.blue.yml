@@ -1,0 +1,24 @@
+services:
+  ml-service-blue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ml-service-blue
+    environment:
+      APP_VERSION: "v1.0.0"
+      MODEL_VERSION: "v1.0.0"
+      PORT: "8000"
+    expose:
+      - "8000"
+    networks:
+      - ml-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  ml-net:
+    name: ml-net

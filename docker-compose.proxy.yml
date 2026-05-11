@@ -1,0 +1,15 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: ml-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.active.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - ml-net
+
+networks:
+  ml-net:
+    external: true
+    name: ml-net
