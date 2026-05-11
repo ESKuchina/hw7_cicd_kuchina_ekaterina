@@ -12,6 +12,10 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      CLOUD_TOKEN: ${{ secrets.CLOUD_TOKEN }}
+      MODEL_VERSION: ${{ secrets.MODEL_VERSION }}
+      DEPLOY_URL: ${{ vars.DEPLOY_URL }}
 
     steps:
       - uses: actions/checkout@v5
@@ -22,20 +26,19 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE_TAG="${{ secrets.MODEL_VERSION }}"
-          docker build -t ghcr.io/${{ github.repository }}:${IMAGE_TAG} .
-          docker push ghcr.io/${{ github.repository }}:${IMAGE_TAG}
+          docker build -t ghcr.io/${{ github.repository }}:${MODEL_VERSION} .
+          docker push ghcr.io/${{ github.repository }}:${MODEL_VERSION}
 
       - name: Deploy via API
-        if: ${{ secrets.CLOUD_TOKEN != '' && vars.DEPLOY_URL != '' }}
+        if: ${{ env.CLOUD_TOKEN != '' && env.DEPLOY_URL != '' }}
         run: |
-          curl -X POST "${{ vars.DEPLOY_URL }}" \
-            -H "Authorization: Bearer ${{ secrets.CLOUD_TOKEN }}" \
+          curl -X POST "${DEPLOY_URL}" \
+            -H "Authorization: Bearer ${CLOUD_TOKEN}" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "image=ghcr.io/${{ github.repository }}:${{ secrets.MODEL_VERSION }}"
+            -d "image=ghcr.io/${{ github.repository }}:${MODEL_VERSION}"
 
       - name: Deployment note
-        if: ${{ secrets.CLOUD_TOKEN == '' || vars.DEPLOY_URL == '' }}
+        if: ${{ env.CLOUD_TOKEN == '' || env.DEPLOY_URL == '' }}
         run: |
           echo "Docker image was published to GHCR."
           echo "Deploy step was skipped because CLOUD_TOKEN or DEPLOY_URL is not configured."
