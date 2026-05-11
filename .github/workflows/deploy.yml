@@ -25,12 +25,15 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:${MODEL_VERSION} .
-          docker push ghcr.io/${{ github.repository }}:${MODEL_VERSION}
+          IMAGE_NAME=$(echo "ghcr.io/${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ${IMAGE_NAME}:${MODEL_VERSION} .
+          docker push ${IMAGE_NAME}:${MODEL_VERSION}
 
       - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+          curl -X POST "$RENDER_DEPLOY_HOOK_URL"
 
       - name: Wait for service warm-up
         run: |
