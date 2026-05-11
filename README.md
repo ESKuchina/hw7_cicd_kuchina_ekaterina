@@ -91,3 +91,24 @@ curl -X POST http://localhost/predict \
 ```json
 {"status":"ok","version":"v1.0.0","model_version":"v1.0.0","prediction":6.0}
 ```
+## Скриншоты проверки стратегии Blue-Green
+
+### 1. Проверка blue-версии
+
+![Blue healthcheck](screenshots/01_blue_healthcheck.png)
+
+### 2. Проверка green-версии после переключения трафика
+
+![Green healthcheck after switch](screenshots/02_green_healthcheck_after_switch.png)
+
+### 3. Проверка rollback на blue-версию
+
+![Blue healthcheck after rollback](screenshots/03_blue_healthcheck_after_rollback.png)
+
+### 4. Проверка `/predict` на blue-версии
+
+![Predict blue](screenshots/04_predict_blue.png)
+
+### 5. Проверка `/predict` на green-версии
+
+![Predict green](screenshots/05_predict_green.png)
